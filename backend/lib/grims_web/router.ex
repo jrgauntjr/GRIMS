@@ -7,6 +7,8 @@ defmodule GrimsWeb.Router do
 
   scope "/api", GrimsWeb do
     pipe_through :api
+
+    resources "/todos", TodoController, except: [:new, :edit]
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
