@@ -1,3 +1,3 @@
-defmoudule Grims.Schedules.Schedule do
-  @doc false
+defmodule Grims.Schedules.Schedule do
+
 end
