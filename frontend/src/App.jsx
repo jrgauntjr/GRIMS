@@ -6,6 +6,12 @@ function App() {
   return (
     <main id="root-inner">
       <img src={logo} alt="GRIMS" className="logo" />
+      <div className="button-column">
+        <button className="stacked-btn">TEMPNAME</button>
+        <button className="stacked-btn">TEMPNAME</button>
+        <button className="stacked-btn">TEMPNAME</button>
+        <button className="stacked-btn">TEMPNAME</button>
+      </div>
       <TodoList />
     </main>
   )

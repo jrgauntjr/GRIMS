@@ -6,16 +6,51 @@
 }
 
 .logo {
-  height: 6em;
+  height: 12em;
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+.button-column {
+  position: absolute;
+  top: 14.5em;       
+  left: 1.5em;     
+  width: 12em;     
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* The left-aligned menu buttons */
+.stacked-btn {
+  text-align: center;
+  width: 100%;             
+  box-sizing: border-box;  
+  padding: 0.8em 1.2em; 
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: #1a1a1a;
+  color: rgba(255, 255, 255, 0.87);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.25s, background-color 0.25s;
+}
+
+/* Hover effect */
+.stacked-btn:hover {
+  border-color: #646cff;
+  background-color: #242424;
 }
 
 @media (prefers-reduced-motion: no-preference) {
