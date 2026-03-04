@@ -13,3 +13,7 @@ To run:
 * Run ```./startdev.sh``` (Linux only)
 
 The script only runs if dependencies are already installed on your system (changes coming soon for this)
+
+To stop both:
+* Exit both terminals
+* CTRL + C on both and for after for Phoenix type ```a``` and hit enter. Both terminal windows will close by themselves after.
