@@ -19,6 +19,9 @@ function App() {
           <Link to="/todos" className="stacked-btn">
             To-do
           </Link>
+          <Link to="/jobs" className="stacked-btn">
+            Jobs
+          </Link>
           <Link to="/reports" className="stacked-btn">
             Reports
           </Link>
