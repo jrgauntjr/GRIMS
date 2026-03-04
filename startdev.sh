@@ -3,6 +3,16 @@
 # Tell user we're starting the servers
 echo "Starting React and Phoenix servers..."
 
+cd backend
+
+mix deps.get
+
+cd ../frontend
+
+npm install
+
+cd ..
+
 gnome-terminal \
     --window -- bash -c "npm run dev --prefix frontend"
     

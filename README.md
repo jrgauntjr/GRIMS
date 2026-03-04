@@ -12,7 +12,7 @@ To run:
 
 * Run ```./startdev.sh``` (Linux only)
 
-The script only runs if dependencies are already installed on your system (changes coming soon for this)
+Some dependencies are checked during the script, but more thorough check will be implemented in the future
 
 To stop both:
 * Exit both terminals
