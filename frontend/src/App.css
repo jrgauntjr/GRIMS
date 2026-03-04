@@ -23,12 +23,27 @@
 
 .button-column {
   position: absolute;
-  top: 14.5em;       
-  left: 1.5em;     
-  width: 12em;     
+  top: 14.5em;
+  left: 1.5em;
+  width: 12em;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.button-column a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.page-content {
+  margin-left: 16em;
+  padding: 1.5rem 2rem;
+  min-height: 100vh;
+}
+
+.home-content {
+  text-align: left;
 }
 
 /* The left-aligned menu buttons */
