@@ -1,6 +1,7 @@
+import BuiltReports from '../components/BuiltReports'
 
 function Reports() {
-    return
+    return <BuiltReports />
 }
 
 export default Reports;

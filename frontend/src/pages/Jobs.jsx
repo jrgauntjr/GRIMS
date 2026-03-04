@@ -1,6 +1,7 @@
+import JobSchedule from '../components/JobSchedule'
 
 function Jobs() {
-    return
+    return <JobSchedule />
 }
 
 export default Jobs;

@@ -1,6 +1,7 @@
+import InventoryManage from '../components/InventoryManage'
 
 function Inventory() {
-    return
+    return <InventoryManage />
 }
 
 export default Inventory;
