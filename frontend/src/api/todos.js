@@ -1,20 +1,4 @@
-const API_BASE = '/api';
-
-async function request(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  });
-  if (!res.ok && res.status !== 204) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.errors?.detail || err.errors || res.statusText);
-  }
-  if (res.status === 204) return null;
-  return res.json();
-}
+import { request } from './request.js';
 
 export async function fetchTodos() {
   const data = await request('/todos');
