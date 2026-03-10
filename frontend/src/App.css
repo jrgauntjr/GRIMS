@@ -43,9 +43,12 @@
 }
 
 .home-content {
-  text-align: left;
+  text-align: center;
 }
-
+.home-content .todo-list {
+  max-width: 16rem;
+  margin-left: 0;
+}
 /* The left-aligned menu buttons */
 .stacked-btn {
   text-align: center;

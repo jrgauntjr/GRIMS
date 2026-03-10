@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { fetchTodos, createTodo, updateTodo, deleteTodo } from '../api/todos'
 import './TodoList.css'
 
-export default function TodoList() {
+export default function TodoList({ readOnly = false }) {
   const [todos, setTodos] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -65,19 +65,21 @@ export default function TodoList() {
           {error}
         </div>
       )}
-      <form onSubmit={handleAdd} className="todo-form">
-        <input
-          type="text"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
-          placeholder="What needs to be done?"
-          className="todo-input"
-          aria-label="New todo title"
-        />
-        <button type="submit" className="todo-submit">
-          Add
-        </button>
-      </form>
+      {!readOnly && (
+        <form onSubmit={handleAdd} className="todo-form">
+          <input
+            type="text"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            placeholder="What needs to be done?"
+            className="todo-input"
+            aria-label="New todo title"
+          />
+          <button type="submit" className="todo-submit">
+            Add
+          </button>
+        </form>
+      )}
       <ul className="todo-items">
         {todos.length === 0 ? (
           <li className="todo-empty">No items yet. Add one above.</li>
@@ -87,18 +89,21 @@ export default function TodoList() {
               <input
                 type="checkbox"
                 checked={todo.completed}
-                onChange={() => handleToggle(todo)}
+                onChange={readOnly ? undefined : () => handleToggle(todo)}
                 aria-label={todo.title}
+                disabled={readOnly}
               />
               <span className="todo-title">{todo.title}</span>
-              <button
-                type="button"
-                onClick={() => handleDelete(todo.id)}
-                className="todo-delete"
-                aria-label={`Delete ${todo.title}`}
-              >
-                ×
-              </button>
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={() => handleDelete(todo.id)}
+                  className="todo-delete"
+                  aria-label={`Delete ${todo.title}`}
+                >
+                  ×
+                </button>
+              )}
             </li>
           ))
         )}
