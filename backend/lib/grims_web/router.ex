@@ -9,6 +9,7 @@ defmodule GrimsWeb.Router do
     pipe_through :api
 
     resources "/todos", TodoController, except: [:new, :edit]
+    resources "/schedules", ScheduleController, except: [:new, :edit]
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

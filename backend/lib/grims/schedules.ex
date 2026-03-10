@@ -3,7 +3,6 @@ defmodule Grims.Schedules do
   The Schedules context: CRUD for job scheduling items.
   """
   import Ecto.Query, only: [from: 2]
-
   alias Grims.Repo
   alias Grims.Schedules.Schedule
 
