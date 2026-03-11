@@ -45,6 +45,23 @@
 .home-content {
   text-align: center;
 }
+
+#description {
+  font-size: 1.0em;
+  padding-bottom: 1em;
+}
+
+#glance {
+  text-align: center;
+  font-size: 1.8em;
+  border: .4em groove #646cff;
+  border-radius: 1em;
+  width: 35%;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  margin: 0 auto;
+}
+
 .home-content .todo-list {
   max-width: 16rem;
   margin-left: 0;
@@ -69,6 +86,12 @@
 .stacked-btn:hover {
   border-color: #646cff;
   background-color: #242424;
+}
+
+.footer {
+  border: .4em groove #646cff;
+  width: 70%;
+  margin: 0 auto;
 }
 
 @media (prefers-reduced-motion: no-preference) {

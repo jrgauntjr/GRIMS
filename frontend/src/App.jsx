@@ -32,6 +32,9 @@ function App() {
             <Route path="/todos" element={<Todos />} />
           </Routes>
         </div>
+        <div className="footer">
+          <h2>GRIMS, an application made by Joseph Gaunt, 2026</h2>
+        </div>
       </main>
     </BrowserRouter>
   )
