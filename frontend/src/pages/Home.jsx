@@ -9,7 +9,7 @@ function Home() {
         Inventory management for retro game stores and repair shops, with just a litte more.
       </p>
       <p id="glance">
-        <strong>At a glance</strong>
+        <strong>At a Glance</strong>
       </p>
       <div className="home-at-a-glance">
         <TodoList readOnly />

@@ -2,6 +2,16 @@ import { useState, useEffect } from 'react'
 import { fetchSchedules, createSchedule, updateSchedule, deleteSchedule } from '../api/schedules'
 import './JobSchedule.css'
 
+function formatStatus(value) {
+  const labels = {
+    open: 'Open',
+    in_progress: 'In Progress',
+    done: 'Done',
+    cancelled: 'Cancelled',
+  }
+  return labels[value] ?? value
+}
+
 export default function JobSchedule({ readOnly = false }) {
   const [schedules, setSchedules] = useState([])
   const [loading, setLoading] = useState(true)
@@ -146,7 +156,7 @@ export default function JobSchedule({ readOnly = false }) {
             <li key={schedule.id} className={`job-schedule-item status-${schedule.status}`}>
               <span className="job-schedule-customer">{schedule.customer_name}</span>
               <span className="job-schedule-console">{schedule.console}</span>
-              <span className="job-schedule-status-label">{schedule.status}</span>
+              <span className="job-schedule-status-label">{formatStatus(schedule.status)}</span>
             </li>
           ))
         ) : (
