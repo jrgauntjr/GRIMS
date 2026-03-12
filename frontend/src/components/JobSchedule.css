@@ -1,0 +1,134 @@
+ .job-schedule {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  text-align: left;
+}
+
+.job-schedule h1 {
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+  color: #b9c2f5;
+}
+
+.job-schedule-loading {
+  color: #666;
+}
+
+.job-schedule-error {
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  background: #fef2f2;
+  color: #b91c1c;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.job-schedule-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.job-schedule-form input,
+.job-schedule-form select {
+  padding: 0.5rem 0.6rem;
+  font-size: 0.95rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.job-schedule-form button {
+  grid-column: 1 / -1;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #fff;
+  background: #2563eb;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.job-schedule-form button:hover {
+  background: #1d4ed8;
+}
+
+.job-schedule-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.job-schedule-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.job-schedule-item:last-child {
+  border-bottom: none;
+}
+
+.job-schedule-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.job-schedule-customer {
+  font-weight: 600;
+}
+
+.job-schedule-console {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.job-schedule-description {
+  font-size: 0.95rem;
+}
+
+.job-schedule-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.job-schedule-status select {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.9rem;
+}
+
+.job-schedule-status-label {
+  font-size: 0.9rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  background: black;
+}
+
+.job-schedule-delete {
+  padding: 0.25rem 0.5rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: #6b7280;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.job-schedule-delete:hover {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.job-schedule-empty {
+  padding: 1rem;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
