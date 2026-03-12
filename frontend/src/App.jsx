@@ -3,6 +3,9 @@ import './App.css'
 import logo from './assets/GRIMS_logo.png'
 import Home from './pages/Home'
 import Todos from './pages/Todos'
+import Jobs from './pages/Jobs'
+import Reports from './pages/Reports'
+import Inventory from './pages/Inventory'
 
 function App() {
   return (
@@ -30,6 +33,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/todos" element={<Todos />} />
+            <Route path="/jobs" element={<Jobs />} />
           </Routes>
         </div>
         <div className="footer">

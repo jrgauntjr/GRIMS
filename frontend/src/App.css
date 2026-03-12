@@ -42,10 +42,6 @@
   min-height: 100vh;
 }
 
-.home-content {
-  text-align: center;
-}
-
 #description {
   font-size: 1.0em;
   padding-bottom: 1em;
@@ -62,9 +58,25 @@
   margin: 0 auto;
 }
 
+.home-content {
+  text-align: center;
+}
+
+.home-at-a-glance {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
 .home-content .todo-list {
-  max-width: 16rem;
-  margin-left: 0;
+  margin: 0;
+  flex: 0 1 25rem;
+}
+
+.home-content .job-schedule {
+  flex: 1 1 20rem;
+  min-width: 17rem;
 }
 /* The left-aligned menu buttons */
 .stacked-btn {
