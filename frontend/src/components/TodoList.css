@@ -84,6 +84,22 @@
   accent-color: #2563eb;
 }
 
+.todo-item input[type="checkbox"]:disabled {
+  opacity: 0.35;
+  cursor: default;
+  accent-color: #6b7280;
+}
+
+.todo-list-readonly .todo-title {
+  color: #9ca3af;
+  opacity: 0.85;
+}
+
+.todo-list-readonly .todo-item.completed .todo-title {
+  color: #6b7280;
+  opacity: 0.7;
+}
+
 .todo-title {
   flex: 1;
   font-size: 1rem;

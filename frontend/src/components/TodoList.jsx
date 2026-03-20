@@ -58,7 +58,7 @@ export default function TodoList({ readOnly = false }) {
 
   if (loading) return <div className="todo-list todo-loading">Loading…</div>
   return (
-    <div className="todo-list">
+    <div className={`todo-list${readOnly ? ' todo-list-readonly' : ''}`}>
       <h1>To-do</h1>
       {error && (
         <div className="todo-error" role="alert">
