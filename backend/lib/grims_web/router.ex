@@ -28,4 +28,9 @@ defmodule GrimsWeb.Router do
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
+
+  scope "/", GrimsWeb do
+    get "/", PageController, :index
+    get "/*path", PageController, :index
+  end
 end
