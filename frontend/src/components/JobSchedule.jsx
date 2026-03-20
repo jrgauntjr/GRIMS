@@ -12,6 +12,22 @@ function formatStatus(value) {
   return labels[value] ?? value
 }
 
+function formatElapsed(schedule) {
+  const insertedAt = schedule?.inserted_at
+  if (!insertedAt) return '—'
+  const start = new Date(insertedAt).getTime()
+  const end =
+    (schedule?.status === 'done' || schedule?.status === 'cancelled') && schedule?.updated_at
+      ? new Date(schedule.updated_at).getTime()
+      : Date.now()
+  const sec = Math.floor((end - start) / 1000)
+  if (sec < 0) return '—'
+  if (sec < 60) return `${sec}s`
+  if (sec < 3600) return `${Math.floor(sec / 60)}m`
+  if (sec < 86400) return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`
+  return `${Math.floor(sec / 86400)}d ${Math.floor((sec % 86400) / 3600)}h`
+}
+
 export default function JobSchedule({ readOnly = false }) {
   const [schedules, setSchedules] = useState([])
   const [loading, setLoading] = useState(true)
@@ -39,6 +55,12 @@ export default function JobSchedule({ readOnly = false }) {
 
   useEffect(() => {
     load()
+  }, [])
+
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 1000)
+    return () => clearInterval(id)
   }, [])
 
   const handleFieldChange = (e) => {
@@ -156,6 +178,7 @@ export default function JobSchedule({ readOnly = false }) {
             <li key={schedule.id} className={`job-schedule-item status-${schedule.status}`}>
               <span className="job-schedule-customer">{schedule.customer_name}</span>
               <span className="job-schedule-console">{schedule.console}</span>
+              <span className="job-schedule-elapsed">{formatElapsed(schedule)}</span>
               <span className="job-schedule-status-label">{formatStatus(schedule.status)}</span>
             </li>
           ))
@@ -168,6 +191,7 @@ export default function JobSchedule({ readOnly = false }) {
                     {schedule.customer_name} ({schedule.customer_number})
                   </span>
                   <span className="job-schedule-console">{schedule.console}</span>
+                  <span className="job-schedule-elapsed">{formatElapsed(schedule)}</span>
                 </div>
                 <div className="job-schedule-description">{schedule.description}</div>
               </div>

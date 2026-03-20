@@ -89,6 +89,12 @@
   color: #6b7280;
 }
 
+.job-schedule-elapsed {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  color: #6b7280;
+}
+
 .job-schedule-description {
   font-size: 0.95rem;
 }
