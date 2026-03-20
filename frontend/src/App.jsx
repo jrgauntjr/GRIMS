@@ -11,7 +11,9 @@ function App() {
   return (
     <BrowserRouter>
       <main id="root-inner">
-        <img src={logo} alt="GRIMS" className="logo" />
+        <Link to="/">
+          <img src={logo} alt="GRIMS" className="logo" />
+        </Link>
         <div className="button-column">
           <Link to="/" className="stacked-btn">
             Home

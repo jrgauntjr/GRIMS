@@ -71,19 +71,28 @@
 
 .home-content .todo-list {
   margin: 0;
-  flex: 0 1 25rem;
+  flex: 0 1 22rem;
+  border: .4em groove #FF948F;
+  padding-top: 0.75rem;
 }
 
 .home-content .job-schedule {
-  flex: 1 1 20rem;
-  min-width: 17rem;
+  flex: 1 1 22rem;
+  min-width: 19rem;
+  border: .4em groove #FF948F;
+  padding-top: 0.75rem;
+}
+
+.home-content .todo-list h1,
+.home-content .job-schedule h1 {
+  margin-top: 0.25rem;
 }
 /* The left-aligned menu buttons */
 .stacked-btn {
   text-align: center;
-  width: 100%;             
-  box-sizing: border-box;  
-  padding: 0.8em 1.2em; 
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.8em 1.2em;
   font-size: 1em;
   font-weight: 500;
   cursor: pointer;
@@ -91,13 +100,15 @@
   color: rgba(255, 255, 255, 0.87);
   border: 1px solid transparent;
   border-radius: 8px;
-  transition: border-color 0.25s, background-color 0.25s;
+  will-change: filter;
+  transition: filter 300ms, border-color 0.25s, background-color 0.25s;
 }
 
-/* Hover effect */
+/* Hover effect - same glow as logo */
 .stacked-btn:hover {
   border-color: #646cff;
   background-color: #242424;
+  filter: drop-shadow(0 0 2em #646cffaa);
 }
 
 .footer {
