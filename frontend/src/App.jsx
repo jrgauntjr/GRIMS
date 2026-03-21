@@ -39,7 +39,7 @@ function App() {
           </Routes>
         </div>
         <div className="footer">
-          <h2>GRIMS 2026 Joseph Gaunt</h2>
+          <h2>G.R.I.M.S 2026 Joseph Gaunt</h2>
         </div>
       </main>
     </BrowserRouter>

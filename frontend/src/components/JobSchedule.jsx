@@ -151,7 +151,7 @@ export default function JobSchedule({ readOnly = false }) {
             name="console"
             value={newSchedule.console}
             onChange={handleFieldChange}
-            placeholder="Console (e.g. SNES, PS2)"
+            placeholder="Device (PS2, S21, etc.)"
           />
           <select name="status" value={newSchedule.status} onChange={handleFieldChange}>
             <option value="open">Open</option>
@@ -159,12 +159,13 @@ export default function JobSchedule({ readOnly = false }) {
             <option value="done">Done</option>
             <option value="cancelled">Cancelled</option>
           </select>
-          <input
-            type="text"
+          <textarea
+            id="desc"
             name="description"
             value={newSchedule.description}
             onChange={handleFieldChange}
             placeholder="Problem description"
+            rows={4}
           />
           <button type="submit">Add ticket</button>
         </form>

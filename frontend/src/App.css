@@ -71,14 +71,14 @@
 
 .home-content .todo-list {
   margin: 0;
-  flex: 0 1 22rem;
+  flex: 0 1 24rem;
   border: .4em groove #FF948F;
   padding-top: 0.75rem;
 }
 
 .home-content .job-schedule {
-  flex: 1 1 22rem;
-  min-width: 19rem;
+  flex: 1 1 26rem;
+  min-width: 22rem;
   border: .4em groove #FF948F;
   padding-top: 0.75rem;
 }
