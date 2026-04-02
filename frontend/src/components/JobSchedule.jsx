@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchSchedules, createSchedule, updateSchedule, deleteSchedule } from '../api/schedules'
+import jobsLight from '../assets/jobs_light.png'
 import './JobSchedule.css'
 
 function formatStatus(value) {
@@ -65,7 +66,12 @@ export default function JobSchedule({ readOnly = false }) {
 
   const handleFieldChange = (e) => {
     const { name, value } = e.target
-    setNewSchedule((prev) => ({ ...prev, [name]: value }))
+    if (name === 'customer_number') {
+      const onlyNumbers = value.replace(/[^0-9]/g, '');
+      setNewSchedule((prev) => ({ ...prev, [name]: onlyNumbers }));
+    } else {
+      setNewSchedule((prev) => ({ ...prev, [name]: value }));
+    }
   }
 
   const handleAdd = async (e) => {
@@ -119,11 +125,13 @@ export default function JobSchedule({ readOnly = false }) {
     }
   }
 
+
+
   if (loading) return <div className="job-schedule job-schedule-loading">Loading…</div>
 
   return (
     <div className="job-schedule">
-      <h1>Jobs</h1>
+      <h1>Jobs <img src={jobsLight} alt="Jobs" className="job-schedule-icon" width={25} height={25} /></h1>
       {error && (
         <div className="job-schedule-error" role="alert">
           {error}
@@ -136,6 +144,7 @@ export default function JobSchedule({ readOnly = false }) {
             type="text"
             name="customer_name"
             value={newSchedule.customer_name}
+            maxLength={30}
             onChange={handleFieldChange}
             placeholder="Customer name"
           />
@@ -143,6 +152,8 @@ export default function JobSchedule({ readOnly = false }) {
             type="text"
             name="customer_number"
             value={newSchedule.customer_number}
+            maxLength={9}
+            inputMode="numeric"
             onChange={handleFieldChange}
             placeholder="Customer number"
           />
@@ -151,6 +162,7 @@ export default function JobSchedule({ readOnly = false }) {
             name="console"
             value={newSchedule.console}
             onChange={handleFieldChange}
+            maxLength={25}
             placeholder="Device (PS2, S21, etc.)"
           />
           <select name="status" value={newSchedule.status} onChange={handleFieldChange}>
@@ -166,6 +178,7 @@ export default function JobSchedule({ readOnly = false }) {
             onChange={handleFieldChange}
             placeholder="Problem description"
             rows={4}
+            maxLength={300}
           />
           <button type="submit">Add ticket</button>
         </form>
