@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchTodos, createTodo, updateTodo, deleteTodo } from '../api/todos'
+import todoLight from '../assets/todo_light.png'
 import './TodoList.css'
 
 export default function TodoList({ readOnly = false }) {
@@ -59,7 +60,7 @@ export default function TodoList({ readOnly = false }) {
   if (loading) return <div className="todo-list todo-loading">Loading…</div>
   return (
     <div className={`todo-list${readOnly ? ' todo-list-readonly' : ''}`}>
-      <h1>To-do</h1>
+      <h1>To-do <img src={todoLight} alt="To-do" className="todo-list-icon" width={25} height={25} /></h1>
       {error && (
         <div className="todo-error" role="alert">
           {error}
