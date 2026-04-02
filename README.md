@@ -1,4 +1,4 @@
-# GRIMS
+# G.R.I.M.S
 
 Welcome to the Game and Repair Inventory Management System!
 
@@ -6,14 +6,15 @@ Currently under development, this program is a useful inventory management syste
 
 Features include built in job scheduling, to-do lists, efficient inventory management including easy additions for all parts, games and consoles.
 
-Many of these features are under development, currently to-do list is the only working function, but stay tuned for more updates!
+Many of these features are under development, currently to-do list and job scheduling are the only working functions, but stay tuned for more updates!
 
-To run:
 
-* Run ```./startdev.sh``` (Linux only)
-
-Some dependencies are checked during the script, but more thorough check will be implemented in the future
-
-To stop both:
-* Exit both terminals
-* CTRL + C on both and for after for Phoenix type ```a``` and hit enter. Both terminal windows will close by themselves after.
+Current Tasks
+ - Inventory Management with TheGamesDB API integration
+ - Tags and filtration for to-do list 
+ - Security of Databases and switching to HTTPS for communication between frontend, backend and databases
+ - Tags and filtration for job scheduling
+ - Built in reports and report creation (relys on Inventory working)
+ - Working production executables for Windows, Mac and Linux
+ - Installer for Windows
+ - UI Work/Artwork
