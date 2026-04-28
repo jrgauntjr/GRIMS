@@ -12,6 +12,7 @@ defmodule GrimsWeb.TodoJSON do
       id: todo.id,
       title: todo.title,
       completed: todo.completed,
+      tags: todo.tags || [],
       inserted_at: todo.inserted_at,
       updated_at: todo.updated_at
     }

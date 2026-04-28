@@ -8,7 +8,13 @@ export async function fetchTodos() {
 export async function createTodo(todo) {
   const data = await request('/todos', {
     method: 'POST',
-    body: JSON.stringify({ todo: { title: todo.title, completed: todo.completed ?? false } }),
+    body: JSON.stringify({
+      todo: {
+        title: todo.title,
+        completed: todo.completed ?? false,
+        tags: Array.isArray(todo.tags) ? todo.tags : [],
+      },
+    }),
   });
   return data.data;
 }
