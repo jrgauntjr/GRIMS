@@ -49,8 +49,10 @@ function App() {
         <div className="page-content">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/inventory" element={<Inventory />} />
             <Route path="/todos" element={<Todos />} />
             <Route path="/jobs" element={<Jobs />} />
+            <Route path="/reports" element={<Reports />} />
           </Routes>
         </div>
         <div className="footer">

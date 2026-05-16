@@ -11,7 +11,6 @@ Many of these features are under development, currently to-do list and job sched
 
 Current Tasks
  - Inventory Management with TheGamesDB API integration
- - Tags and filtration for to-do list 
  - Security of Databases and switching to HTTPS for communication between frontend, backend and databases
  - Tags and filtration for job scheduling
  - Built in reports and report creation (relys on Inventory working)
