@@ -139,7 +139,7 @@ defmodule Grims.Igdb do
 
   defp fetch_games(client_id, token, query) do
     body =
-      ~s|search "#{escape_apicalypse(query)}"; fields name,summary,first_release_date,cover.image_id,platforms.name; limit 20;|
+      ~s|search "#{escape_apicalypse(query)}"; fields name,summary,first_release_date,cover.image_id,platforms.name; limit 25;|
 
     case Req.post(@games_url,
            headers: [
