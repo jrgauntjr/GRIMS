@@ -12,5 +12,5 @@
 erl_crash.dump
 *.ez
 npm-debug.log*
-.sh
-.bat
+*.sh
+*.bat
