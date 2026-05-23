@@ -10,6 +10,8 @@ defmodule GrimsWeb.Router do
 
     resources "/todos", TodoController, except: [:new, :edit]
     resources "/schedules", ScheduleController, except: [:new, :edit]
+    resources "/inventories", InventoryController, except: [:new, :edit]
+    get "/games/search", GameSearchController, :index
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

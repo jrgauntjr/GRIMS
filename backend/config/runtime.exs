@@ -116,4 +116,8 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Req
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+
+  config :grims, :igdb,
+    client_id: System.get_env("IGDB_CLIENT_ID"),
+    client_secret: System.get_env("IGDB_CLIENT_SECRET")
 end
