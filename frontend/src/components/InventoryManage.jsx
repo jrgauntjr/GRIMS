@@ -1,70 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import inventoryLight from '../assets/inventory_light.png'
+import {
+  createInventory,
+  deleteInventory,
+  fetchInventories,
+  searchGames,
+  updateInventory,
+} from '../api/inventories.js'
 import './InventoryManage.css'
-
-/** Sample rows shaped like future IGDB normalize step — replace with API later */
-const MOCK_CATALOG = [
-  {
-    igdbId: 'mock-101',
-    name: 'The Legend of Zelda: A Link to the Past',
-    platforms: ['SNES'],
-    releaseYear: 1991,
-    summary: 'Top-down action-adventure; cornerstone of 16-bit era.',
-  },
-  {
-    igdbId: 'mock-102',
-    name: 'Super Mario World',
-    platforms: ['SNES'],
-    releaseYear: 1990,
-    summary: 'Pack-in platformer that defined the Super Nintendo launch.',
-  },
-  {
-    igdbId: 'mock-103',
-    name: 'Final Fantasy VII',
-    platforms: ['PlayStation'],
-    releaseYear: 1997,
-    summary: 'JRPG blockbuster that widened the genre globally.',
-  },
-  {
-    igdbId: 'mock-104',
-    name: 'Metal Gear Solid',
-    platforms: ['PlayStation'],
-    releaseYear: 1998,
-    summary: 'Cinematic stealth action from Kojima Productions.',
-  },
-  {
-    igdbId: 'mock-105',
-    name: 'Sonic the Hedgehog 2',
-    platforms: ['Genesis'],
-    releaseYear: 1992,
-    summary: 'Speed-focused platformer with co-op Tails.',
-  },
-  {
-    igdbId: 'mock-106',
-    name: 'Castlevania: Symphony of the Night',
-    platforms: ['PlayStation'],
-    releaseYear: 1997,
-    summary: 'Metroidvania landmark with RPG-lite progression.',
-  },
-  {
-    igdbId: 'mock-107',
-    name: 'Pokémon Red / Blue',
-    platforms: ['Game Boy'],
-    releaseYear: 1998,
-    summary: 'Collect-and-battle RPG that launched a franchise.',
-  },
-  {
-    igdbId: 'mock-108',
-    name: 'Street Fighter II Turbo',
-    platforms: ['SNES'],
-    releaseYear: 1993,
-    summary: 'Competitive fighting staple with faster pacing.',
-  },
-]
-
-function normalize(s) {
-  return s.trim().toLowerCase()
-}
 
 /** Stable hue pair for placeholder “box art” until IGDB cover URLs exist */
 function coverGradientStyle(seed) {
@@ -114,32 +57,72 @@ const CONDITIONS = [
 export default function InventoryManage() {
   const [query, setQuery] = useState('')
   const [inventory, setInventory] = useState([])
+  const [searchResults, setSearchResults] = useState([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchError, setSearchError] = useState(null)
+  const [shelfLoading, setShelfLoading] = useState(true)
+  const [shelfError, setShelfError] = useState(null)
   const [shelfSortTitle, setShelfSortTitle] = useState('az')
   const [shelfPlatform, setShelfPlatform] = useState('')
   const [shelfYear, setShelfYear] = useState('')
 
-  const results = useMemo(() => {
-    const q = normalize(query)
-    if (!q) return []
-    return MOCK_CATALOG.filter((game) => {
-      const inTitle = normalize(game.name).includes(q)
-      const inPlatform = game.platforms.some((p) => normalize(p).includes(q))
-      const inSummary = normalize(game.summary).includes(q)
-      const yearStr = String(game.releaseYear)
-      const inYear = yearStr.includes(q)
-      return inTitle || inPlatform || inSummary || inYear
-    })
+  useEffect(() => {
+    let cancelled = false
+
+    fetchInventories()
+      .then((rows) => {
+        if (!cancelled) setInventory(rows)
+      })
+      .catch((err) => {
+        if (!cancelled) setShelfError(err.message)
+      })
+      .finally(() => {
+        if (!cancelled) setShelfLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    const q = query.trim()
+    if (q.length < 2) {
+      setSearchResults([])
+      setSearchError(null)
+      setSearchLoading(false)
+      return undefined
+    }
+
+    let cancelled = false
+    const timer = setTimeout(() => {
+      setSearchLoading(true)
+      setSearchError(null)
+      searchGames(q)
+        .then((games) => {
+          if (!cancelled) setSearchResults(games)
+        })
+        .catch((err) => {
+          if (!cancelled) {
+            setSearchResults([])
+            setSearchError(err.message)
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setSearchLoading(false)
+        })
+    }, 350)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
   }, [query])
 
-  function addLine(game) {
-    const id =
-      typeof crypto !== 'undefined' && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `inv-${Date.now()}-${Math.random().toString(16).slice(2)}`
-    setInventory((prev) => [
-      ...prev,
-      {
-        id,
+  async function addLine(game) {
+    setShelfError(null)
+    try {
+      const created = await createInventory({
         igdbId: game.igdbId,
         name: game.name,
         platforms: game.platforms,
@@ -147,18 +130,46 @@ export default function InventoryManage() {
         qty: 1,
         condition: 'good',
         notes: '',
-      },
-    ])
+      })
+      setInventory((prev) => [...prev, created])
+    } catch (err) {
+      setShelfError(err.message)
+    }
   }
 
-  function removeLine(id) {
+  async function removeLine(id) {
+    setShelfError(null)
+    const previous = inventory
     setInventory((prev) => prev.filter((row) => row.id !== id))
+    try {
+      await deleteInventory(id)
+    } catch (err) {
+      setShelfError(err.message)
+      setInventory(previous)
+    }
   }
 
-  function updateLine(id, patch) {
+  async function updateLine(id, patch) {
+    const row = inventory.find((r) => r.id === id)
+    if (!row) return
+
+    const next = { ...row, ...patch }
+    setShelfError(null)
     setInventory((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, ...patch } : row)),
+      prev.map((r) => (r.id === id ? next : r)),
     )
+
+    try {
+      const saved = await updateInventory(id, next)
+      setInventory((prev) =>
+        prev.map((r) => (r.id === id ? saved : r)),
+      )
+    } catch (err) {
+      setShelfError(err.message)
+      setInventory((prev) =>
+        prev.map((r) => (r.id === id ? row : r)),
+      )
+    }
   }
 
   const shelfPlatformOptions = useMemo(() => {
@@ -218,14 +229,15 @@ export default function InventoryManage() {
         <h1>Inventory <img src={inventoryLight} alt="Inventory" className="inventory-manage-icon" width={25} height={25} /></h1>
         <p className="inventory-manage__lede">
           Search IGDB-backed titles, pick a match, then track quantity, condition,
-          and notes on your shelf. Results here use local mock data; swapping in
-          the Phoenix API response should keep this layout intact.
+          and notes on your shelf. Shelf lines are saved in the database.
         </p>
-        <div className="inventory-manage__badge-row">
-          <span className="inventory-manage__badge">UI temp </span>
-          <span className="inventory-manage__badge">IGDB via API next</span>
-        </div>
       </header>
+
+      {shelfError && (
+        <p className="inventory-manage__error" role="alert">
+          {shelfError}
+        </p>
+      )}
 
       <section
         className="inventory-manage__panel inventory-manage__panel--search"
@@ -269,33 +281,41 @@ export default function InventoryManage() {
         <h2 id="inventory-results-heading" className="inventory-manage__h2">
           Results
         </h2>
+        {searchError && (
+          <p className="inventory-manage__error" role="alert">
+            {searchError}
+          </p>
+        )}
         {!trimmed && (
           <p className="inventory-manage__muted">
-            Start typing to filter the stand-in catalog ({MOCK_CATALOG.length}{' '}
-            titles). With IGDB connected, the same search bar will call your
-            backend instead.
+            Type at least two characters to search IGDB via the backend.
           </p>
         )}
-        {trimmed && results.length === 0 && (
+        {trimmed && trimmed.length < 2 && (
+          <p className="inventory-manage__muted">Keep typing to search…</p>
+        )}
+        {trimmed.length >= 2 && searchLoading && (
+          <p className="inventory-manage__muted">Searching…</p>
+        )}
+        {trimmed.length >= 2 && !searchLoading && searchResults.length === 0 && !searchError && (
           <p className="inventory-manage__empty">
-            No matching games. Try another spelling or broader keywords — live
-            IGDB search will return richer matches.
+            No matching games. Try another spelling or broader keywords.
           </p>
         )}
-        {results.length > 0 && (
+        {searchResults.length > 0 && (
           <>
             <p className="inventory-manage__results-meta" aria-live="polite">
-              {results.length} result{results.length === 1 ? '' : 's'} for &quot;
+              {searchResults.length} result{searchResults.length === 1 ? '' : 's'} for &quot;
               {trimmed}&quot;
             </p>
             <ul className="inventory-manage__result-grid">
-              {results.map((game) => (
+              {searchResults.map((game) => (
                   <li key={game.igdbId} className="inventory-manage__card">
                     <GameCover game={game} />
                     <div className="inventory-manage__card-body">
                       <h3 className="inventory-manage__title">{game.name}</h3>
                       <span className="inventory-manage__igdb-pill">
-                        ID {game.igdbId.replace(/^mock-/, '')} · preview
+                        IGDB {game.igdbId}
                       </span>
                       <p className="inventory-manage__meta">
                         {game.platforms.join(' · ')} · {game.releaseYear}
@@ -323,7 +343,9 @@ export default function InventoryManage() {
         <h2 id="inventory-shelf-heading" className="inventory-manage__h2">
           On the shelf
         </h2>
-        {inventory.length === 0 ? (
+        {shelfLoading ? (
+          <p className="inventory-manage__muted">Loading shelf…</p>
+        ) : inventory.length === 0 ? (
           <p className="inventory-manage__muted">
             Nothing added yet. Use &quot;Add to shelf&quot; from the results.
           </p>

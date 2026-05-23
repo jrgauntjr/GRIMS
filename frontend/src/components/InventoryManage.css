@@ -123,6 +123,16 @@
   color: #94a3b8;
 }
 
+.inventory-manage__error {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.45);
+  border: 1px solid #991b1b;
+  border-radius: 8px;
+}
+
 .inventory-manage__results-meta {
   margin: 0 0 0.85rem;
   font-size: 0.85rem;
