@@ -11,6 +11,9 @@ defmodule GrimsWeb.Router do
     resources "/todos", TodoController, except: [:new, :edit]
     resources "/schedules", ScheduleController, except: [:new, :edit]
     resources "/inventories", InventoryController, except: [:new, :edit]
+    resources "/reports", ReportController, except: [:new, :edit] do
+      get "/run", ReportController, :run
+    end
     get "/games/search", GameSearchController, :index
   end
 
