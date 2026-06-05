@@ -1,27 +1,147 @@
-This is a web application written using the Phoenix web framework.
+# AGENTS.md
 
-## Project guidelines
+This file provides guidance to AI coding agents when working with the GRIMS Phoenix backend.
 
-- Use `mix precommit` alias when you are done with all changes and fix any pending issues
-- Use the already included and available `:req` (`Req`) library for HTTP requests, **avoid** `:httpoison`, `:tesla`, and `:httpc`. Req is included by default and is the preferred HTTP client for Phoenix apps
+For monorepo setup, ports, and running both apps, see the root `AGENTS.md`. For React and API client conventions, see `frontend/AGENTS.md`.
 
-### Phoenix v1.8 guidelines
+## Project Overview
 
-- **Always** begin your LiveView templates with `<Layouts.app flash={@flash} ...>` which wraps all inner content
-- The `MyAppWeb.Layouts` module is aliased in the `my_app_web.ex` file, so you can use it without needing to alias it again
-- Anytime you run into errors with no `current_scope` assign:
-  - You failed to follow the Authenticated Routes guidelines, or you failed to pass `current_scope` to `<Layouts.app>`
-  - **Always** fix the `current_scope` error by moving your routes to the proper `live_session` and ensure you pass `current_scope` as needed
-- Phoenix v1.8 moved the `<.flash_group>` component to the `Layouts` module. You are **forbidden** from calling `<.flash_group>` outside of the `layouts.ex` module
-- Out of the box, `core_components.ex` imports an `<.icon name="hero-x-mark" class="w-5 h-5"/>` component for for hero icons. **Always** use the `<.icon>` component for icons, **never** use `Heroicons` modules or similar
-- **Always** use the imported `<.input>` component for form inputs from `core_components.ex` when available. `<.input>` is imported and using it will save steps and prevent errors
-- If you override the default input classes (`<.input class="myclass px-2 py-1 rounded-lg">)`) class with your own values, no default classes are inherited, so your
-custom classes must fully style the input
+The backend is a Phoenix 1.8 JSON API app (`:grims`). It exposes REST endpoints under `/api` for the React SPA. Business logic lives in contexts under `lib/grims/`; HTTP handling lives in `lib/grims_web/`.
 
+There is no LiveView or server-rendered HTML UI. In production, `PageController` serves the built SPA from `priv/static/index.html`; all feature UI is in the frontend.
 
-<!-- usage-rules-start -->
+Primary keys are UUIDs (`--binary-id`).
 
-<!-- phoenix:elixir-start -->
+## API surface
+
+| Endpoint | Context | Controller | JSON module |
+|----------|---------|------------|-------------|
+| `/api/todos` | `Grims.Todos` | `TodoController` | `TodoJSON` |
+| `/api/schedules` | `Grims.Schedules` | `ScheduleController` | `ScheduleJSON` |
+| `/api/inventories` | `Grims.Inventories` | `InventoryController` | `InventoryJSON` |
+| `/api/reports` | `Grims.Reports` | `ReportController` | `ReportJSON` |
+| `GET /api/reports/:id/run` | `Grims.Reports` | `ReportController` | `ReportJSON` |
+| `GET /api/games/search` | `Grims.Igdb` | `GameSearchController` | `GameSearchJSON` |
+
+Use `TodoController`, `TodoJSON`, and `test/grims_web/controllers/inventory_controller_test.exs` as reference patterns for new resources.
+
+### Environment variables
+
+Game search (`Grims.Igdb`) requires Twitch/IGDB credentials:
+
+- `IGDB_CLIENT_ID`
+- `IGDB_CLIENT_SECRET`
+
+Set these in the environment when working on inventory game search locally.
+
+## Repository Layout
+
+- **`lib/grims/`** — Contexts, schemas, and domain logic (e.g. `Grims.Todos`, `Grims.Inventories`).
+- **`lib/grims/<context>/<schema>.ex`** — Ecto schemas (e.g. `Grims.Todos.Todo`).
+- **`lib/grims_web/controllers/`** — JSON API controllers.
+- **`lib/grims_web/views/`** — JSON rendering modules (`*JSON.ex`), plus shared `ChangesetJSON` and `ErrorJSON`.
+- **`lib/grims_web/router.ex`** — API routes under `scope "/api", GrimsWeb`.
+- **`config/`** — Environment config. Dev/test DB credentials in `dev.exs` / `test.exs`; production uses `runtime.exs`.
+- **`priv/repo/migrations/`** — Ecto migrations.
+- **`test/`** — Tests mirror `lib/`. Controller tests use `GrimsWeb.ConnCase`.
+
+## Development Commands
+
+All commands run from `backend/`:
+
+```sh
+# First-time setup (deps, DB, migrations, seeds)
+mix setup
+
+# Start the API server (http://localhost:4000)
+mix phx.server
+
+# Run all tests
+mix test
+
+# Run a single test file or line
+mix test test/grims_web/controllers/todo_controller_test.exs
+mix test test/grims_web/controllers/todo_controller_test.exs:42
+
+# Re-run only failed tests
+mix test --failed
+
+# Pre-commit check (compile warnings-as-errors, format, test)
+mix precommit
+
+# Format Elixir code
+mix format
+
+# Generate a migration
+mix ecto.gen.migration migration_name
+
+# Reset database
+mix ecto.reset
+
+# Scaffold a JSON API resource (context, schema, controller, tests)
+mix phx.gen.json ContextName SchemaName schema_names field:type
+```
+
+Run `mix precommit` before pushing backend changes.
+
+## Architecture
+
+### Contexts and schemas
+
+- Put CRUD and domain logic in context modules (`Grims.Todos`, `Grims.Reports`, etc.).
+- Schemas live in nested modules (`Grims.Todos.Todo`) with changeset functions.
+- Controllers should stay thin: parse params, call the context, render JSON or return errors.
+
+### JSON API layer
+
+- API routes use the `:api` pipeline and live under `/api`.
+- Controllers use `action_fallback GrimsWeb.FallbackController` for shared error handling.
+- Each resource has a matching `*JSON` module in `lib/grims_web/views/` (e.g. `GrimsWeb.TodoJSON`).
+- Successful responses wrap records in a `data` key:
+
+  ```elixir
+  def show(%{todo: todo}), do: %{data: data(todo)}
+  ```
+
+- Validation errors render via `GrimsWeb.ChangesetJSON` as `%{errors: ...}`.
+- Not-found and generic errors render via `GrimsWeb.ErrorJSON`.
+- `DELETE` success returns `204 No Content` with an empty body.
+
+### Request params
+
+- Create/update params arrive wrapped by resource name, matching the frontend API client:
+
+  ```elixir
+  def create(conn, %{"todo" => todo_params})
+  def update(conn, %{"id" => id, "inventory" => inventory_params})
+  ```
+
+- Guard param shape with `when is_map(...)` clauses. Return `422` via `ErrorJSON` when the wrapper key is missing.
+
+### Router conventions
+
+- Standard resources use `resources "/name", Controller, except: [:new, :edit]`.
+- Custom actions belong in the resource block (see `/api/reports/:id/run`).
+- The router `scope` alias prefixes controller modules; do not duplicate `GrimsWeb` in route definitions.
+- Dev-only tools (LiveDashboard, Swoosh mailbox) live under `/dev`, not `/api`.
+
+### External HTTP
+
+- Use `:req` (`Req`) for outbound HTTP. Do not add HTTPoison, Tesla, or `:httpc`.
+
+## Adding a new API resource
+
+1. Generate with `mix phx.gen.json` or add context, schema, controller, JSON view, and migration manually following existing resources.
+2. Register routes in `router.ex` under `scope "/api", GrimsWeb`.
+3. Add controller tests in `test/grims_web/controllers/`.
+4. Add or extend the matching module in `frontend/src/api/`.
+
+Keep JSON field names snake_case so the frontend can map them consistently.
+
+## Production SPA
+
+`PageController` serves `priv/static/index.html` for all non-API routes. Before a production deploy, build the frontend (`cd frontend && npm run build`) and copy `frontend/dist/` into `backend/priv/static/`. There is no automated deploy script yet — do not assume assets sync themselves.
+
 ## Elixir guidelines
 
 - Elixir lists **do not support index based access via the access syntax**
@@ -32,80 +152,51 @@ custom classes must fully style the input
       mylist = ["blue", "green"]
       mylist[i]
 
-  Instead, **always** use `Enum.at`, pattern matching, or `List` for index based list access, ie:
+  Instead, **always** use `Enum.at`, pattern matching, or `List` for index based list access:
 
-      i = 0
-      mylist = ["blue", "green"]
       Enum.at(mylist, i)
 
-- Elixir variables are immutable, but can be rebound, so for block expressions like `if`, `case`, `cond`, etc
-  you *must* bind the result of the expression to a variable if you want to use it and you CANNOT rebind the result inside the expression, ie:
+- Elixir variables are immutable, but can be rebound. For block expressions like `if`, `case`, and `cond`, bind the result to a variable instead of rebinding inside the block.
 
-      # INVALID: we are rebinding inside the `if` and the result never gets assigned
-      if connected?(socket) do
-        socket = assign(socket, :val, val)
-      end
-
-      # VALID: we rebind the result of the `if` to a new variable
-      socket =
-        if connected?(socket) do
-          assign(socket, :val, val)
-        end
-
-- **Never** nest multiple modules in the same file as it can cause cyclic dependencies and compilation errors
-- **Never** use map access syntax (`changeset[:field]`) on structs as they do not implement the Access behaviour by default. For regular structs, you **must** access the fields directly, such as `my_struct.field` or use higher level APIs that are available on the struct if they exist, `Ecto.Changeset.get_field/2` for changesets
-- Elixir's standard library has everything necessary for date and time manipulation. Familiarize yourself with the common `Time`, `Date`, `DateTime`, and `Calendar` interfaces by accessing their documentation as necessary. **Never** install additional dependencies unless asked or for date/time parsing (which you can use the `date_time_parser` package)
-- Don't use `String.to_atom/1` on user input (memory leak risk)
-- Predicate function names should not start with `is_` and should end in a question mark. Names like `is_thing` should be reserved for guards
-- Elixir's builtin OTP primitives like `DynamicSupervisor` and `Registry`, require names in the child spec, such as `{DynamicSupervisor, name: MyApp.MyDynamicSup}`, then you can use `DynamicSupervisor.start_child(MyApp.MyDynamicSup, child_spec)`
-- Use `Task.async_stream(collection, callback, options)` for concurrent enumeration with back-pressure. The majority of times you will want to pass `timeout: :infinity` as option
+- **Never** nest multiple modules in the same file; it can cause cyclic dependencies and compilation errors.
+- **Never** use map access syntax (`changeset[:field]`) on structs. Use `my_struct.field` or `Ecto.Changeset.get_field/2` for changesets.
+- Elixir's standard library covers date and time needs. **Never** install extra dependencies unless asked, except `date_time_parser` for parsing if needed.
+- Don't use `String.to_atom/1` on user input (memory leak risk).
+- Predicate functions end with `?` and should not start with `is_` (reserved for guards).
+- Named OTP children (e.g. `DynamicSupervisor`, `Registry`) need a `name:` in their child spec.
+- Prefer `Task.async_stream/3` for concurrent work with back-pressure; pass `timeout: :infinity` when appropriate.
 
 ## Mix guidelines
 
-- Read the docs and options before using tasks (by using `mix help task_name`)
-- To debug test failures, run tests in a specific file with `mix test test/my_test.exs` or run all previously failed tests with `mix test --failed`
-- `mix deps.clean --all` is **almost never needed**. **Avoid** using it unless you have good reason
+- Read task docs with `mix help task_name` before using unfamiliar tasks.
+- Debug tests with `mix test path/to_test.exs` or `mix test --failed`.
+- `mix deps.clean --all` is almost never needed.
 
 ## Test guidelines
 
-- **Always use `start_supervised!/1`** to start processes in tests as it guarantees cleanup between tests
-- **Avoid** `Process.sleep/1` and `Process.alive?/1` in tests
-  - Instead of sleeping to wait for a process to finish, **always** use `Process.monitor/1` and assert on the DOWN message:
+- **Always use `start_supervised!/1`** to start processes in tests.
+- **Avoid** `Process.sleep/1` and `Process.alive?/1` in tests.
+  - Wait for process exit with `Process.monitor/1`:
 
       ref = Process.monitor(pid)
       assert_receive {:DOWN, ^ref, :process, ^pid, :normal}
 
-   - Instead of sleeping to synchronize before the next call, **always** use `_ = :sys.get_state/1` to ensure the process has handled prior messages
-<!-- phoenix:elixir-end -->
+  - Synchronize on handled messages with `_ = :sys.get_state/1`.
+- Controller tests assert JSON with `json_response/2` and use fixtures that call context functions.
+- Use `~p"/api/..."` verified routes in test requests.
 
-<!-- phoenix:phoenix-start -->
 ## Phoenix guidelines
 
-- Remember Phoenix router `scope` blocks include an optional alias which is prefixed for all routes within the scope. **Always** be mindful of this when creating routes within a scope to avoid duplicate module prefixes.
+- Router `scope` blocks provide a module alias for controllers in that scope.
+- `Phoenix.View` is not used; JSON rendering uses `*JSON` modules.
+- Do not add LiveView modules, HEEx templates, or browser pipelines for feature work in this app.
 
-- You **never** need to create your own `alias` for route definitions! The `scope` provides the alias, ie:
+## Ecto guidelines
 
-      scope "/admin", AppWeb.Admin do
-        pipe_through :browser
-
-        live "/users", UserLive, :index
-      end
-
-  the UserLive route would point to the `AppWeb.Admin.UserLive` module
-
-- `Phoenix.View` no longer is needed or included with Phoenix, don't use it
-<!-- phoenix:phoenix-end -->
-
-<!-- phoenix:ecto-start -->
-## Ecto Guidelines
-
-- **Always** preload Ecto associations in queries when they'll be accessed in templates, ie a message that needs to reference the `message.user.email`
-- Remember `import Ecto.Query` and other supporting modules when you write `seeds.exs`
-- `Ecto.Schema` fields always use the `:string` type, even for `:text`, columns, ie: `field :name, :string`
-- `Ecto.Changeset.validate_number/2` **DOES NOT SUPPORT the `:allow_nil` option**. By default, Ecto validations only run if a change for the given field exists and the change value is not nil, so such as option is never needed
-- You **must** use `Ecto.Changeset.get_field(changeset, :field)` to access changeset fields
-- Fields which are set programatically, such as `user_id`, must not be listed in `cast` calls or similar for security purposes. Instead they must be explicitly set when creating the struct
-- **Always** invoke `mix ecto.gen.migration migration_name_using_underscores` when generating migration files, so the correct timestamp and conventions are applied
-<!-- phoenix:ecto-end -->
-
-<!-- usage-rules-end -->
+- **Always** preload associations in queries when they'll be accessed in JSON views or downstream code.
+- Remember `import Ecto.Query` in `seeds.exs` and similar scripts.
+- Schema fields use `:string` even for `:text` columns: `field :name, :string`.
+- `Ecto.Changeset.validate_number/2` does not support `:allow_nil`; validations skip nil changes by default.
+- Use `Ecto.Changeset.get_field/2` to read changeset fields.
+- Fields set programmatically (e.g. `user_id`) must not appear in `cast/3`; set them explicitly when building the struct.
+- **Always** generate migrations with `mix ecto.gen.migration migration_name_using_underscores`.

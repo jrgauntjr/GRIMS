@@ -4,135 +4,63 @@ This file provides guidance to AI coding agents when working with code in this r
 
 ## Project Overview
 
-GRIMS is a monorepo with an Elixir/Phoenix API backend and a React (Vite) frontend. The backend serves JSON APIs consumed by the React SPA. PostgreSQL is the database.
-This application is a retro game shop inventory manager, with key features including intelligent inventory management, built in job scheduling, built in reporting with option to create reports and a to-do list.
+GRIMS is a monorepo with an Elixir/Phoenix JSON API backend and a React (Vite) frontend. PostgreSQL is the database.
+
+This application is a retro game shop inventory manager with built-in job scheduling, reporting (including custom report creation), and a to-do list.
+
+In development, Vite serves the React UI and proxies `/api` to Phoenix. In production, Phoenix serves the built SPA from `priv/static/` via `PageController` while exposing JSON under `/api`.
 
 ## Repository Layout
 
-- `backend/` — Phoenix 1.8 API app (app name: `:grims`). No HTML views or asset pipeline — API-only.
+- `backend/` — Phoenix 1.8 app (app name: `:grims`). JSON API and production SPA host.
 - `frontend/` — React 19 SPA built with Vite 7.
 - `.tool-versions` — asdf version pinning (Erlang 27.2, Elixir 1.18.2, Node 22.14.0).
 
+## Where to look
+
+| Topic | Document |
+|-------|----------|
+| React, routing, API client, UI patterns | `frontend/AGENTS.md` |
+| Phoenix, Ecto, JSON API, tests | `backend/AGENTS.md` |
+| Product status and roadmap (humans) | `README.md` |
+
 ## Prerequisites
+
 - PostgreSQL running locally
 - `asdf install` from `.tool-versions`
-- First time running: `cd backend && mix setup`
+- First-time backend: `cd backend && mix setup`
+- First-time frontend: `cd frontend && npm install`
+
+All commands run from Ubuntu or WSL on Windows. Use `asdf` for runtime versions.
 
 ## Run the application
 
-Current development requires two terminal sessions
+Development uses two terminal sessions:
 
-### Frontend
+1. **Backend** — `cd backend && mix phx.server` → http://localhost:4000
+2. **Frontend** — `cd frontend && npm run dev` → http://localhost:5173
 
-```sh
-cd frontend && npm run dev
-```
+The Vite dev server proxies `/api` to the Phoenix server. Do not hardcode `http://localhost:4000` in frontend code.
 
-### Backend
-```sh
-cd backend && mix phx.server
-```
+### Pre-push checklist
 
-## Development Commands
+- Backend: `cd backend && mix precommit`
+- Frontend: `cd frontend && npm run lint`
 
-All commands run from within Ubuntu or WSL if using Windows. Use `asdf` for runtime version management.
+Full command reference lives in `backend/AGENTS.md` and `frontend/AGENTS.md`.
 
-### Backend (`backend/`)
+## Adding a full-stack feature
 
-```sh
-# First-time setup (install deps, create DB, run migrations, seed)
-cd backend
-mix setup
+1. Backend: migration → context/schema → controller + JSON view → controller tests (`backend/AGENTS.md`)
+2. Frontend: API module in `src/api/` → component/page → route + nav link (`frontend/AGENTS.md`)
+3. Run `mix precommit` and `npm run lint` before pushing
 
-# Start the Phoenix server (default: http://localhost:4000)
-mix phx.server
-# or with interactive Elixir shell:
-iex -S mix phx.server
+## Feature maturity
 
-# Run all tests (creates/migrates test DB automatically)
-mix test
+Core areas (todos, jobs/scheduling, inventory, reports) are implemented but still evolving. Security hardening and HTTPS are planned — do not remove or weaken security-related code without being asked. See `README.md` for the current human-facing roadmap.
 
-# Run a single test file
-mix test test/path/to_test.exs
+## Agent guidelines
 
-# Run a single test by line number
-mix test test/path/to_test.exs:42
+See `frontend/AGENTS.md` for React, routing, API client, and styling conventions.
 
-# Re-run only previously failed tests
-mix test --failed
-
-# Pre-commit check (compile warnings-as-errors, unlock unused deps, format, test)
-mix precommit
-
-# Format code
-mix format
-
-# Generate an Ecto migration
-mix ecto.gen.migration migration_name
-
-# Reset database (drop + create + migrate + seed)
-mix ecto.reset
-
-# Generate a JSON API resource (context + schema + controller + tests)
-mix phx.gen.json ContextName SchemaName schema_names field:type
-```
-
-### Frontend (`frontend/`)
-
-```sh
-# Install dependencies
-npm install
-
-# Start dev server (default: http://localhost:5173)
-npm run dev
-
-# Production build
-npm run build
-
-# Lint
-npm run lint
-
-# Preview production build locally
-npm run preview
-```
-
-## Architecture
-
-### Backend
-
-The Phoenix app follows standard Phoenix 1.8 conventions:
-
-- **`lib/grims/`** — Business logic (contexts, schemas, repo). Add new domain modules here as contexts (e.g. `Grims.Accounts`, `Grims.Inventory`).
-- **`lib/grims_web/`** — Web layer (router, controllers, JSON views, endpoint, telemetry).
-- **`lib/grims_web/router.ex`** — All API routes live under the `scope "/api", GrimsWeb` block using the `:api` pipeline.
-- **`config/`** — Per-environment config. Database credentials are in `dev.exs` / `test.exs`; production config uses `runtime.exs` with environment variables.
-- **`priv/repo/migrations/`** — Ecto database migrations.
-- **`test/`** — Tests mirror the `lib/` structure. `test/support/` has shared test helpers and fixtures.
-
-The backend uses `--binary-id` so all Ecto schemas use UUIDs as primary keys by default.
-
-### Frontend
-
-Standard Vite + React structure:
-
-- **`src/`** — React components, pages, hooks, and utilities.
-- **`src/main.jsx`** — App entry point.
-- **`public/`** — Static assets served as-is.
-- **`vite.config.js`** — Vite configuration. A proxy config forwards `/api` requests to Phoenix during development.
-
-### Cross-cutting
-
-- The backend runs on port **4000**, the frontend dev server on port **5173**.
-- In development,  `/api` is proxied to `http://localhost:4000` via `vite.config.js`
-- In production, the React build output (`frontend/dist/`) should be served by Phoenix or a reverse proxy (nginx, etc.).
-
-## Backend-Specific Guidelines
-
-See `backend/AGENTS.md` for detailed Phoenix, Elixir, Ecto, and testing conventions. Key highlights:
-
-- Use `mix precommit` before pushing changes.
-- Use `:req` (Req) for HTTP requests — never HTTPoison, Tesla, or :httpc.
-- Ecto schemas use `:string` for both `varchar` and `text` columns.
-- Always preload associations in queries when they'll be accessed downstream.
-- Generate migrations with `mix ecto.gen.migration` — never create migration files manually.
-- In tests, use `start_supervised!/1` for processes and `Process.monitor/1` instead of `Process.sleep/1`.
+See `backend/AGENTS.md` for Phoenix, Elixir, Ecto, JSON API, and testing conventions.
