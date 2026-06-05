@@ -1,10 +1,11 @@
 # AGENTS.md
 
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
+This file provides guidance to AI coding agents when working with code in this repository.
 
 ## Project Overview
 
 GRIMS is a monorepo with an Elixir/Phoenix API backend and a React (Vite) frontend. The backend serves JSON APIs consumed by the React SPA. PostgreSQL is the database.
+This application is a retro game shop inventory manager, with key features including intelligent inventory management, built in job scheduling, built in reporting with option to create reports and a to-do list.
 
 ## Repository Layout
 
@@ -12,14 +13,35 @@ GRIMS is a monorepo with an Elixir/Phoenix API backend and a React (Vite) fronte
 - `frontend/` — React 19 SPA built with Vite 7.
 - `.tool-versions` — asdf version pinning (Erlang 27.2, Elixir 1.18.2, Node 22.14.0).
 
+## Prerequisites
+- PostgreSQL running locally
+- `asdf install` from `.tool-versions`
+- First time running: `cd backend && mix setup`
+
+## Run the application
+
+Current development requires two terminal sessions
+
+### Frontend
+
+```sh
+cd frontend && npm run dev
+```
+
+### Backend
+```sh
+cd backend && mix phx.server
+```
+
 ## Development Commands
 
-All commands run from within WSL (Ubuntu). Use `asdf` for runtime version management.
+All commands run from within Ubuntu or WSL if using Windows. Use `asdf` for runtime version management.
 
 ### Backend (`backend/`)
 
 ```sh
 # First-time setup (install deps, create DB, run migrations, seed)
+cd backend
 mix setup
 
 # Start the Phoenix server (default: http://localhost:4000)
@@ -96,12 +118,12 @@ Standard Vite + React structure:
 - **`src/`** — React components, pages, hooks, and utilities.
 - **`src/main.jsx`** — App entry point.
 - **`public/`** — Static assets served as-is.
-- **`vite.config.js`** — Vite configuration. Will need a proxy config added to forward `/api` requests to Phoenix during development.
+- **`vite.config.js`** — Vite configuration. A proxy config forwards `/api` requests to Phoenix during development.
 
 ### Cross-cutting
 
 - The backend runs on port **4000**, the frontend dev server on port **5173**.
-- In development, configure a Vite proxy in `vite.config.js` to forward `/api` calls to `http://localhost:4000`.
+- In development,  `/api` is proxied to `http://localhost:4000` via `vite.config.js`
 - In production, the React build output (`frontend/dist/`) should be served by Phoenix or a reverse proxy (nginx, etc.).
 
 ## Backend-Specific Guidelines
