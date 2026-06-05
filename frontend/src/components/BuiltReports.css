@@ -185,6 +185,60 @@
 .built-reports__tile--custom {
   border-color: #8b9cf7;
   position: relative;
+  padding: 0;
+}
+
+.built-reports__tile-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-height: 5.5rem;
+  padding: 1rem 1.1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.built-reports__delete {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  z-index: 1;
+  padding: 0.2rem 0.45rem;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #475569;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.built-reports__delete:hover:not(:disabled) {
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.65);
+  border-color: #991b1b;
+}
+
+.built-reports__delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.built-reports__detail-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.built-reports__detail-title-row h1 {
+  margin-top: 0.35rem;
 }
 
 .built-reports__tile-badge {
@@ -437,4 +491,172 @@
 .built-reports__btn--ghost:hover {
   color: #e2e8f0;
   border-color: #646cff;
+}
+
+.built-reports__btn--danger {
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.45);
+  border-color: #991b1b;
+}
+
+.built-reports__btn--danger:hover:not(:disabled) {
+  color: #fff;
+  background: #991b1b;
+  border-color: #dc2626;
+}
+
+.built-reports__btn--danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.built-reports__results-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.built-reports__results-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.built-reports__view-toggle {
+  display: inline-flex;
+  padding: 0.2rem;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.55);
+}
+
+.built-reports__view-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #94a3b8;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background-color 0.15s;
+}
+
+.built-reports__view-btn:hover:not(:disabled) {
+  color: #e2e8f0;
+}
+
+.built-reports__view-btn[aria-pressed='true'] {
+  color: #043677;
+  background: #c2cdff;
+}
+
+.built-reports__view-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.built-reports__chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  height: 16rem;
+  padding: 0.75rem 0.75rem 0;
+  overflow-x: auto;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.35);
+}
+
+.built-reports__chart-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 1 3rem;
+  min-width: 2.75rem;
+  max-width: 6rem;
+  height: 100%;
+}
+
+.built-reports__chart-bar-value {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 0.2rem;
+}
+
+.built-reports__chart-bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.built-reports__chart-bar {
+  width: 72%;
+  min-height: 2px;
+  background: linear-gradient(180deg, #8b9cf7 0%, #646cff 100%);
+  border-radius: 4px 4px 0 0;
+}
+
+.built-reports__chart-bar-label {
+  margin-top: 0.4rem;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.built-reports__empty {
+  margin: 0;
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 8px;
+  border: 1px dashed #475569;
+}
+
+.built-reports__table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #334155;
+}
+
+.built-reports__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  color: #e2e8f0;
+}
+
+.built-reports__table th,
+.built-reports__table td {
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  border-bottom: 1px solid #334155;
+  vertical-align: top;
+}
+
+.built-reports__table th {
+  font-weight: 700;
+  color: #b9c2f5;
+  background: rgba(30, 41, 59, 0.85);
+  white-space: nowrap;
+}
+
+.built-reports__table tbody tr:hover {
+  background: rgba(51, 65, 85, 0.35);
 }

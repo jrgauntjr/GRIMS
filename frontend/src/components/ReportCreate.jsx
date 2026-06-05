@@ -6,7 +6,7 @@ import {
   defaultFormState,
   getSourceConfig,
 } from '../data/reportFormConfig.js'
-import { saveCustomReport } from '../data/customReports.js'
+import { createReport } from '../api/reports.js'
 import './BuiltReports.css'
 
 function toggleColumn(columns, value) {
@@ -20,6 +20,7 @@ export default function ReportCreate() {
   const navigate = useNavigate()
   const [form, setForm] = useState(defaultFormState())
   const [error, setError] = useState(null)
+  const [saving, setSaving] = useState(false)
   const [savedSlug, setSavedSlug] = useState(null)
 
   const sourceConfig = useMemo(
@@ -46,7 +47,7 @@ export default function ReportCreate() {
     })
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
 
@@ -60,18 +61,24 @@ export default function ReportCreate() {
       return
     }
 
-    const saved = saveCustomReport({
-      title: name,
-      description: form.description.trim() || 'Custom report',
-      source: form.source,
-      sortField: form.sortField,
-      sortDirection: form.sortDirection,
-      groupBy: form.groupBy,
-      columns: form.columns,
-      filters: form.filters,
-    })
-
-    setSavedSlug(saved.slug)
+    setSaving(true)
+    try {
+      const saved = await createReport({
+        title: name,
+        description: form.description.trim() || 'Custom report',
+        source: form.source,
+        sortField: form.sortField,
+        sortDirection: form.sortDirection,
+        groupBy: form.groupBy,
+        columns: form.columns,
+        filters: form.filters,
+      })
+      setSavedSlug(saved.slug)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   if (savedSlug) {
@@ -80,8 +87,7 @@ export default function ReportCreate() {
         <section className="built-reports__panel built-reports__panel--success">
           <h2 className="built-reports__h2">Report saved</h2>
           <p className="built-reports__muted">
-            &quot;{form.name.trim()}&quot; is in your report library (stored locally
-            until the backend is connected).
+            &quot;{form.name.trim()}&quot; is saved in your report library.
           </p>
           <div className="built-reports__form-actions">
             <button
@@ -484,8 +490,12 @@ export default function ReportCreate() {
         </section>
 
         <div className="built-reports__form-actions">
-          <button type="submit" className="built-reports__btn built-reports__btn--primary">
-            Save report
+          <button
+            type="submit"
+            className="built-reports__btn built-reports__btn--primary"
+            disabled={saving}
+          >
+            {saving ? 'Saving…' : 'Save report'}
           </button>
           <Link to="/reports" className="built-reports__btn built-reports__btn--ghost">
             Cancel

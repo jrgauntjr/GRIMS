@@ -1,7 +1,9 @@
-import { Link, useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { deleteReport, fetchReport, runReport } from '../api/reports.js'
 import { getBuiltInReport } from '../data/builtInReports.js'
-import { getCustomReport } from '../data/customReports.js'
 import { REPORT_SOURCES, getSourceConfig } from '../data/reportFormConfig.js'
+import ReportResults from './ReportResults.jsx'
 import './BuiltReports.css'
 
 function ReportDefinitionSummary({ report }) {
@@ -68,14 +70,95 @@ function ReportDefinitionSummary({ report }) {
 
 export default function ReportDetail() {
   const { slug } = useParams()
+  const navigate = useNavigate()
   const builtIn = getBuiltInReport(slug)
-  const custom = getCustomReport(slug)
+  const [custom, setCustom] = useState(null)
+  const [error, setError] = useState(null)
+  const [runResult, setRunResult] = useState(null)
+  const [runLoading, setRunLoading] = useState(true)
+  const [runError, setRunError] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!custom) return
+
+    if (
+      !window.confirm(
+        `Delete "${custom.title}"? This cannot be undone.`,
+      )
+    ) {
+      return
+    }
+
+    setDeleting(true)
+    setError(null)
+
+    try {
+      await deleteReport(custom.slug)
+      navigate('/reports')
+    } catch (err) {
+      setError(err.message)
+      setDeleting(false)
+    }
+  }
+
+  useEffect(() => {
+    if (builtIn) return undefined
+
+    let cancelled = false
+
+    fetchReport(slug)
+      .then((report) => {
+        if (!cancelled) setCustom(report)
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [slug, builtIn])
+
+  useEffect(() => {
+    let cancelled = false
+
+    runReport(slug)
+      .then((result) => {
+        if (!cancelled) setRunResult(result)
+      })
+      .catch((err) => {
+        if (!cancelled) setRunError(err.message)
+      })
+      .finally(() => {
+        if (!cancelled) setRunLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [slug])
+
   const report = builtIn ?? custom
+  const metaLoading = !builtIn && !custom && !error
+
+  if (metaLoading) {
+    return (
+      <div className="built-reports built-reports--detail">
+        <Link to="/reports" className="built-reports__back">
+          ← Back to reports
+        </Link>
+        <p className="built-reports__muted">Loading report…</p>
+      </div>
+    )
+  }
 
   if (!report) {
     return (
       <div className="built-reports built-reports--detail">
-        <p className="built-reports__error">Report not found.</p>
+        <p className="built-reports__error" role="alert">
+          {error ?? 'Report not found.'}
+        </p>
         <Link to="/reports" className="built-reports__back">
           ← Back to reports
         </Link>
@@ -89,10 +172,29 @@ export default function ReportDetail() {
         ← Back to reports
       </Link>
       <header className="built-reports__detail-header">
-        {custom && <span className="built-reports__tile-badge">Custom</span>}
-        <h1>{report.title}</h1>
+        <div className="built-reports__detail-title-row">
+          <div>
+            {custom && <span className="built-reports__tile-badge">Custom</span>}
+            <h1>{report.title}</h1>
+          </div>
+          {custom && (
+            <button
+              type="button"
+              className="built-reports__btn built-reports__btn--danger"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? 'Deleting…' : 'Delete report'}
+            </button>
+          )}
+        </div>
         <p className="built-reports__lede">{report.description}</p>
       </header>
+      {error && (
+        <p className="built-reports__error" role="alert">
+          {error}
+        </p>
+      )}
       {custom && (
         <section className="built-reports__panel" aria-labelledby="report-config-heading">
           <h2 id="report-config-heading" className="built-reports__h2">
@@ -101,14 +203,16 @@ export default function ReportDetail() {
           <ReportDefinitionSummary report={custom} />
         </section>
       )}
-      <section className="built-reports__panel" aria-labelledby="report-preview-heading">
-        <h2 id="report-preview-heading" className="built-reports__h2">
-          Preview
+      <section className="built-reports__panel" aria-labelledby="report-results-heading">
+        <h2 id="report-results-heading" className="built-reports__h2">
+          Results
         </h2>
-        <p className="built-reports__muted">
-          Report output will load here once the backend report runner is wired
-          up. This page is ready for tables, charts, or export actions.
-        </p>
+        <ReportResults
+          key={slug}
+          result={runResult}
+          loading={runLoading}
+          error={runError}
+        />
       </section>
     </div>
   )
