@@ -12,5 +12,13 @@
 erl_crash.dump
 *.ez
 npm-debug.log*
-*.sh
-*.bat
+
+# Desktop distribution artifacts
+vendor/postgres/
+dist/
+backend/burrito_out/postgres/
+
+# Dev scripts
+startdev.sh
+startdev-windowed.sh
+startdev.bat
