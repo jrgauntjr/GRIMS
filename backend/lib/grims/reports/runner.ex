@@ -125,9 +125,18 @@ defmodule Grims.Reports.Runner do
 
     rows = [
       %{"metric" => "Shelf lines", "value" => Integer.to_string(length(items))},
-      %{"metric" => "Total quantity", "value" => Integer.to_string(Enum.sum(Enum.map(items, & &1.qty)))},
-      %{"metric" => "Unique titles", "value" => Integer.to_string(items |> Enum.map(& &1.name) |> Enum.uniq() |> length())},
-      %{"metric" => "Platforms represented", "value" => Integer.to_string(MapSet.size(platform_set))}
+      %{
+        "metric" => "Total quantity",
+        "value" => Integer.to_string(Enum.sum(Enum.map(items, & &1.qty)))
+      },
+      %{
+        "metric" => "Unique titles",
+        "value" => Integer.to_string(items |> Enum.map(& &1.name) |> Enum.uniq() |> length())
+      },
+      %{
+        "metric" => "Platforms represented",
+        "value" => Integer.to_string(MapSet.size(platform_set))
+      }
     ]
 
     columns = column_defs(["metric", "value"], nil)
@@ -152,7 +161,9 @@ defmodule Grims.Reports.Runner do
     end
   end
 
-  defp load_rows("inventory"), do: Inventories.list_inventory_items() |> Enum.map(&inventory_row/1)
+  defp load_rows("inventory"),
+    do: Inventories.list_inventory_items() |> Enum.map(&inventory_row/1)
+
   defp load_rows("jobs"), do: Schedules.list_schedules() |> Enum.map(&job_row/1)
   defp load_rows("todos"), do: Todos.list_todos() |> Enum.map(&todo_row/1)
   defp load_rows(_), do: []
@@ -188,13 +199,19 @@ defmodule Grims.Reports.Runner do
     rows
     |> Enum.filter(fn row ->
       status_match = status == "" or row["status"] == status
-      console_match = console == "" or String.contains?(String.downcase(row["console"] || ""), String.downcase(console))
+
+      console_match =
+        console == "" or
+          String.contains?(String.downcase(row["console"] || ""), String.downcase(console))
+
       status_match and console_match
     end)
   end
 
   defp filter_rows(rows, filters, "todos") do
-    completion = filter_string(filters, ["completion"]) |> then(fn v -> if v == "", do: "all", else: v end)
+    completion =
+      filter_string(filters, ["completion"]) |> then(fn v -> if v == "", do: "all", else: v end)
+
     tag = filter_string(filters, ["tag"])
 
     rows
@@ -229,13 +246,17 @@ defmodule Grims.Reports.Runner do
   defp sort_direction("desc"), do: :desc
   defp sort_direction(_), do: :asc
 
-  defp sort_key(row, "platforms"), do: (row["platforms"] || []) |> Enum.join(", ") |> String.downcase()
+  defp sort_key(row, "platforms"),
+    do: (row["platforms"] || []) |> Enum.join(", ") |> String.downcase()
+
   defp sort_key(row, "tags"), do: (row["tags"] || []) |> Enum.join(", ") |> String.downcase()
   defp sort_key(row, "completed"), do: row["completed"] == true
   defp sort_key(row, field), do: row[field]
 
   defp aggregate_custom(rows, "platform", "inventory"), do: aggregate_inventory_by_platform(rows)
-  defp aggregate_custom(rows, field, "inventory") when field in ["condition", "release_year"], do: aggregate_inventory_by_field(rows, field)
+
+  defp aggregate_custom(rows, field, "inventory") when field in ["condition", "release_year"],
+    do: aggregate_inventory_by_field(rows, field)
 
   defp aggregate_custom(rows, "status", "jobs"), do: aggregate_jobs_by_status(rows)
   defp aggregate_custom(rows, "console", "jobs"), do: aggregate_jobs_by_field(rows, "console")
@@ -317,7 +338,8 @@ defmodule Grims.Reports.Runner do
   end
 
   defp column_label(key, source) when is_binary(source) do
-    Map.get(@column_labels, source, %{}) |> Map.get(key, Map.get(@aggregate_labels, key, humanize(key)))
+    Map.get(@column_labels, source, %{})
+    |> Map.get(key, Map.get(@aggregate_labels, key, humanize(key)))
   end
 
   defp column_label(key, _), do: Map.get(@aggregate_labels, key, humanize(key))
@@ -412,7 +434,9 @@ defmodule Grims.Reports.Runner do
 
   defp filter_int(filters, keys) do
     case filter_string(filters, keys) do
-      "" -> nil
+      "" ->
+        nil
+
       value ->
         case Integer.parse(value) do
           {int, _} -> int

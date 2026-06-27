@@ -4,7 +4,7 @@ defmodule Grims.MixProject do
   def project do
     [
       app: :grims,
-      version: "0.1.0",
+      version: "0.1.2",
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -19,15 +19,18 @@ defmodule Grims.MixProject do
     [
       grims: [
         steps: [:assemble, &Burrito.wrap/1],
+        validate_compile_env: false,
         burrito: [
           targets: [
             linux: [os: :linux, cpu: :x86_64],
-            windows: [os: :windows, cpu: :x86_64]
+            windows: [os: :windows, cpu: :x86_64],
+            macos: [os: :darwin, cpu: :aarch64]
           ]
         ]
       ]
     ]
   end
+
   # Configuration for the OTP application.
   #
   # Type `mix help compile.app` for more information.
@@ -40,7 +43,12 @@ defmodule Grims.MixProject do
 
   def cli do
     [
-      preferred_envs: [precommit: :test]
+      preferred_envs: [
+        precommit: :test,
+        "assets.deploy": :prod,
+        "release.desktop": :prod,
+        "desktop.package.linux": :prod
+      ]
     ]
   end
 
@@ -82,7 +90,22 @@ defmodule Grims.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"],
+      "assets.deploy": [
+        "cmd bash ../scripts/sync-frontend-static.sh",
+        "compile --force"
+      ],
+      "release.desktop": [
+        "assets.deploy",
+        "compile --force",
+        "release grims --overwrite",
+        "cmd bash ../scripts/clear-burrito-cache.sh"
+      ],
+      "desktop.package.linux": [
+        "release.desktop",
+        "cmd bash ../scripts/package-linux-desktop.sh"
+      ],
+      "desktop.run": ["cmd bash ../scripts/run-grims-linux.sh"]
     ]
   end
 end

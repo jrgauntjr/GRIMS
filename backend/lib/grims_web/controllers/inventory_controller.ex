@@ -32,7 +32,8 @@ defmodule GrimsWeb.InventoryController do
          do: render(conn, :show, inventory_item: item)
   end
 
-  def update(conn, %{"id" => id, "inventory" => inventory_params}) when is_map(inventory_params) do
+  def update(conn, %{"id" => id, "inventory" => inventory_params})
+      when is_map(inventory_params) do
     with {:ok, item} <- get_item_or_error(id),
          {:ok, %Inventory{} = item} <- Inventories.update_inventory_item(item, inventory_params),
          do: render(conn, :show, inventory_item: item)

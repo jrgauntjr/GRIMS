@@ -78,9 +78,11 @@ defmodule GrimsWeb.ReportControllerTest do
       report = report_fixture()
 
       conn =
-        put(conn, ~p"/api/reports/#{report}", report: %{
-          "description" => "Updated description"
-        })
+        put(conn, ~p"/api/reports/#{report}",
+          report: %{
+            "description" => "Updated description"
+          }
+        )
 
       assert json_response(conn, 200)["data"]["description"] == "Updated description"
     end

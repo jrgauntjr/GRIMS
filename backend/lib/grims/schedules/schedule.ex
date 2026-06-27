@@ -7,10 +7,14 @@ defmodule Grims.Schedules.Schedule do
 
   schema "schedules" do
     field :customer_name, :string
-    field :customer_number, :string        # phone number or similar
-    field :console, :string                # e.g. "SNES", "PS2", "Switch"
-    field :status, :string, default: "open"  # "open" | "in_progress" | "done" | "cancelled"
-    field :description, :string            # what's wrong
+    # phone number or similar
+    field :customer_number, :string
+    # e.g. "SNES", "PS2", "Switch"
+    field :console, :string
+    # "open" | "in_progress" | "done" | "cancelled"
+    field :status, :string, default: "open"
+    # what's wrong
+    field :description, :string
 
     # inserted_at = when ticket was opened
     # updated_at  = last change

@@ -7,16 +7,28 @@ defmodule Grims.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      GrimsWeb.Telemetry,
-      Grims.Repo,
-      {DNSCluster, query: Application.get_env(:grims, :dns_cluster_query) || :ignore},
-      {Phoenix.PubSub, name: Grims.PubSub},
-      # Start a worker by calling: Grims.Worker.start_link(arg)
-      # {Grims.Worker, arg},
-      # Start to serve requests, typically the last entry
-      GrimsWeb.Endpoint
-    ]
+    postgres_shutdown =
+      if Grims.Desktop.enabled?() do
+        child =
+          case Grims.Desktop.Postgres.ensure_started!() do
+            :bundled -> Grims.Desktop.Postgres.child_spec()
+            :system -> nil
+          end
+
+        Grims.Desktop.setup_database!()
+        child
+      end
+
+    children =
+      [
+        postgres_shutdown,
+        GrimsWeb.Telemetry,
+        Grims.Repo,
+        {DNSCluster, query: Application.get_env(:grims, :dns_cluster_query) || :ignore},
+        {Phoenix.PubSub, name: Grims.PubSub},
+        GrimsWeb.Endpoint
+      ]
+      |> Enum.reject(&is_nil/1)
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

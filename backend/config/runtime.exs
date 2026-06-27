@@ -7,16 +7,19 @@ import Config
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
 
-# ## Using releases
-#
-# If you use `mix release`, you need to explicitly enable the server
-# by passing the PHX_SERVER=true when you start it:
-#
-#     PHX_SERVER=true bin/grims start
-#
-# Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
-# script that automatically sets the env var above.
-if System.get_env("PHX_SERVER") do
+desktop? =
+  System.get_env("GRIMS_DESKTOP") in ~w(1 true yes TRUE YES) or
+    (config_env() == :prod and
+       String.contains?(
+         System.get_env("RELEASE_ROOT") || System.get_env("ROOTDIR") || "",
+         ".burrito"
+       ))
+
+if desktop? do
+  Grims.Desktop.load_config!()
+end
+
+if desktop? or System.get_env("PHX_SERVER") do
   config :grims, GrimsWeb.Endpoint, server: true
 end
 
@@ -53,10 +56,14 @@ if config_env() == :prod do
       """
 
   host = System.get_env("PHX_HOST") || "example.com"
+  port = String.to_integer(System.get_env("PORT", "4000"))
 
   config :grims, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
-  config :grims, GrimsWeb.Endpoint,
+  force_ssl = [rewrite_on: [:x_forwarded_proto], exclude: [hosts: ["localhost", "127.0.0.1"]]]
+
+  endpoint_config = [
+    force_ssl: force_ssl,
     url: [host: host, port: 443, scheme: "https"],
     http: [
       # Enable IPv6 and bind on all interfaces.
@@ -66,6 +73,19 @@ if config_env() == :prod do
       ip: {0, 0, 0, 0, 0, 0, 0, 0}
     ],
     secret_key_base: secret_key_base
+  ]
+
+  endpoint_config =
+    if desktop? do
+      Keyword.merge(endpoint_config,
+        url: [host: "localhost", port: port, scheme: "http"],
+        http: [ip: {127, 0, 0, 1}, port: port]
+      )
+    else
+      endpoint_config
+    end
+
+  config :grims, GrimsWeb.Endpoint, endpoint_config
 
   # ## SSL Support
   #
