@@ -12,7 +12,6 @@ Many of these features are under development, currently to-do list and job sched
 Current Tasks
  - Security of Databases and switching to HTTPS for communication between frontend, backend and databases
  - Tags and filtration for job scheduling
- - Built in reports and report creation (relys on Inventory working)
  - Working production executables for Windows, Mac and Linux
  - Installer for Windows
  - UI Work/Artwork
