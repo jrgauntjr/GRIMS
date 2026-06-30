@@ -15,6 +15,7 @@ npm-debug.log*
 
 # Desktop distribution artifacts
 vendor/postgres/
+vendor/vcredist/
 dist/
 backend/burrito_out/postgres/
 
