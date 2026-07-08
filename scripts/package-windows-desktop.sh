@@ -27,10 +27,13 @@ rm -rf "$DIST_DIR/postgres"
 cp -a "$VENDOR_POSTGRES" "$DIST_DIR/postgres"
 
 cp "$ROOT/scripts/run-grims-windows.bat" "$DIST_DIR/run-grims.bat"
+cp "$ROOT/scripts/run-grims.vbs" "$DIST_DIR/run-grims.vbs"
 cp "$ROOT/scripts/installer/grims.ico" "$DIST_DIR/grims.ico"
 
 mkdir -p "$DIST_DIR/redist"
 cp "$ROOT/vendor/vcredist/vc_redist.x64.exe" "$DIST_DIR/redist/"
+
+bash "$ROOT/scripts/bundle-shop-igdb-env.sh" "$ROOT" "$DIST_DIR"
 
 cat > "$DIST_DIR/README.txt" <<'EOF'
 GRIMS Desktop for Windows (x86_64)
@@ -46,7 +49,7 @@ Portable / zip use (advanced):
   1. Extract this folder anywhere (e.g. C:\GRIMS)
   2. Install the VC++ runtime once if grims_windows.exe reports a missing DLL:
        redist\vc_redist.x64.exe /install /quiet /norestart
-  3. Double-click run-grims.bat
+  3. Double-click run-grims.vbs (recommended) or run-grims.bat
 
 Requirements:
   - Windows 10 or later (64-bit)
@@ -63,7 +66,8 @@ The app creates:
 
 Open http://127.0.0.1:4000 in your browser.
 
-Optional API keys for inventory game search can be added to %APPDATA%\GRIMS\grims.env:
+Inventory game search uses IGDB when igdb.env is present in this folder (shop builds).
+Otherwise add API keys to %APPDATA%\GRIMS\grims.env:
   IGDB_CLIENT_ID=
   IGDB_CLIENT_SECRET=
 EOF

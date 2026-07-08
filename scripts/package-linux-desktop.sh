@@ -30,6 +30,8 @@ cp -a "$VENDOR_POSTGRES" "$DIST_DIR/postgres"
 cp "$ROOT/scripts/run-grims-linux.sh" "$DIST_DIR/run-grims.sh"
 chmod +x "$DIST_DIR/run-grims.sh"
 
+bash "$ROOT/scripts/bundle-shop-igdb-env.sh" "$ROOT" "$DIST_DIR"
+
 cat > "$DIST_DIR/README.txt" <<'EOF'
 GRIMS Desktop for Linux (x86_64)
 
@@ -54,7 +56,8 @@ The app creates:
 
 Open http://127.0.0.1:4000 in your browser.
 
-Optional API keys for inventory game search can be added to ~/.config/grims/grims.env:
+Inventory game search uses IGDB when igdb.env is present in this folder (shop builds).
+Otherwise add API keys to ~/.config/grims/grims.env:
   IGDB_CLIENT_ID=
   IGDB_CLIENT_SECRET=
 EOF

@@ -14,12 +14,20 @@ fi
 
 BINARY="$DESKTOP_DIR/grims_linux"
 PORT="${GRIMS_PORT:-4000}"
+LAUNCH_URL="http://127.0.0.1:${PORT}/desktop/launcher"
 URL="http://127.0.0.1:${PORT}/"
 
 export GRIMS_HOME="$DESKTOP_DIR"
 export GRIMS_BIN="$BINARY"
 export GRIMS_DESKTOP=1
 export GRIMS_BUNDLE_POSTGRES=1
+
+if [ -f "$SCRIPT_DIR/igdb.env" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$SCRIPT_DIR/igdb.env"
+  set +a
+fi
 
 server_up() {
   if command -v curl >/dev/null 2>&1; then
@@ -68,7 +76,7 @@ if [ "$ready" -eq 0 ]; then
 fi
 
 if command -v xdg-open >/dev/null 2>&1; then
-  xdg-open "$URL" >/dev/null 2>&1 || true
+  xdg-open "$LAUNCH_URL" >/dev/null 2>&1 || true
 fi
 
 echo "GRIMS is running at $URL (Ctrl+C to stop)"
