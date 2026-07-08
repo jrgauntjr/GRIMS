@@ -143,4 +143,14 @@ defmodule Grims.Desktop do
   end
 
   defp default_database_url, do: Grims.Desktop.Postgres.default_database_url()
+
+  @doc """
+  Gracefully shuts down a desktop session: closes DB connections, stops bundled
+  PostgreSQL when GRIMS started it, then stops the BEAM VM.
+  """
+  def shutdown! do
+    _ = Ecto.Adapters.SQL.disconnect_all(Grims.Repo, :all)
+    Grims.Desktop.Postgres.stop()
+    :init.stop()
+  end
 end

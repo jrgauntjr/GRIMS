@@ -1,6 +1,8 @@
 defmodule Grims.Desktop.Postgres do
   @moduledoc false
 
+  require Logger
+
   @default_port 5433
   @default_user "grims"
   @default_database "grims_desktop"
@@ -40,7 +42,14 @@ defmodule Grims.Desktop.Postgres do
 
       home ->
         if running?(home) do
-          run_cmd!(postgres_bin(home, "pg_ctl"), ["-D", data_dir(), "stop", "fast"], home)
+          case run_cmd(
+                 postgres_bin(home, "pg_ctl"),
+                 ["-D", data_dir(), "stop", "-m", "fast", "-w"],
+                 home
+               ) do
+            0 -> :ok
+            code -> Logger.warning("pg_ctl stop exited with status #{code}")
+          end
         end
 
         :ok
@@ -295,6 +304,8 @@ defmodule Grims.Desktop.PostgresShutdown do
 
   @impl true
   def terminate(_reason, _state) do
+    # shutdown!/0 stops Postgres explicitly before :init.stop(); this is a fallback
+    # when the VM exits through other paths (e.g. Ctrl+C on Linux).
     Grims.Desktop.Postgres.stop()
     :ok
   end

@@ -17,6 +17,9 @@ defmodule GrimsWeb.Router do
     end
 
     get "/games/search", GameSearchController, :index
+
+    get "/desktop", DesktopController, :show
+    post "/desktop/shutdown", DesktopController, :shutdown
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
@@ -37,6 +40,7 @@ defmodule GrimsWeb.Router do
   end
 
   scope "/", GrimsWeb do
+    get "/desktop/launcher", DesktopLaunchController, :show
     get "/", PageController, :index
     get "/*path", PageController, :index
   end
