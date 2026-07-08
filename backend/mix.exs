@@ -4,7 +4,7 @@ defmodule Grims.MixProject do
   def project do
     [
       app: :grims,
-      version: "0.1.2",
+      version: "0.1.4",
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
@@ -47,7 +47,8 @@ defmodule Grims.MixProject do
         precommit: :test,
         "assets.deploy": :prod,
         "release.desktop": :prod,
-        "desktop.package.linux": :prod
+        "desktop.package.linux": :prod,
+        "desktop.package.windows": :prod
       ]
     ]
   end
@@ -104,6 +105,10 @@ defmodule Grims.MixProject do
       "desktop.package.linux": [
         "release.desktop",
         "cmd bash ../scripts/package-linux-desktop.sh"
+      ],
+      "desktop.package.windows": [
+        "release.desktop",
+        "cmd bash ../scripts/package-windows-desktop.sh"
       ],
       "desktop.run": ["cmd bash ../scripts/run-grims-linux.sh"]
     ]
