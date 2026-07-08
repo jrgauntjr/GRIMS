@@ -1,0 +1,22 @@
+.desktop-exit {
+  position: fixed;
+  top: 1.5rem;
+  right: 2rem;
+  z-index: 20;
+  padding: 0.55em 1.1em;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  color: #043677;
+  background-color: #c2cdff;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: filter 300ms, border-color 0.25s, background-color 0.25s, color 0.25s;
+}
+
+.desktop-exit:hover {
+  border-color: #646cff;
+  background-color: #242424;
+  color: rgba(255, 255, 255, 0.87);
+  filter: drop-shadow(0 0 1.5em #646cffaa);
+}
