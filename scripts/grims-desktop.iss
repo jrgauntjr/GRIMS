@@ -13,7 +13,7 @@
 ; Inno Setup often fails with Error 32 when writing setup.exe across WSL mounts.
 ; This script writes the installer to Documents\GRIMS on Windows instead.
 
-#define AppVersion "0.3.0"
+#define AppVersion "0.3.1"
 #define DistDir "..\dist\grims-desktop-windows-x86_64"
 #define InstallerAssetsDir "installer"
 
