@@ -40,7 +40,7 @@ defmodule Grims.Desktop.Postgres do
 
       home ->
         if running?(home) do
-          run_cmd!(Path.join(home, "bin/pg_ctl"), ["-D", data_dir(), "stop", "fast"], home)
+          run_cmd!(postgres_bin(home, "pg_ctl"), ["-D", data_dir(), "stop", "fast"], home)
         end
 
         :ok
@@ -77,10 +77,22 @@ defmodule Grims.Desktop.Postgres do
 
   def data_dir do
     base =
-      System.get_env("XDG_DATA_HOME") ||
-        Path.join(System.get_env("HOME") || "~", ".local/share")
+      case :os.type() do
+        {:win32, _} ->
+          System.get_env("LOCALAPPDATA") || Path.expand("~/AppData/Local")
 
-    Path.join(base, "grims/postgres-data")
+        {:unix, _} ->
+          System.get_env("XDG_DATA_HOME") ||
+            Path.join(System.get_env("HOME") || "~", ".local/share")
+      end
+
+    subdir =
+      case :os.type() do
+        {:win32, _} -> "GRIMS/postgres-data"
+        {:unix, _} -> "grims/postgres-data"
+      end
+
+    Path.join(base, subdir)
   end
 
   defp grims_home do
@@ -105,9 +117,17 @@ defmodule Grims.Desktop.Postgres do
   end
 
   defp postgres_installed?(home) do
-    File.exists?(Path.join(home, "bin/postgres")) and
-      File.exists?(Path.join(home, "bin/initdb")) and
-      File.exists?(Path.join(home, "bin/pg_ctl"))
+    Enum.all?(~w(postgres initdb pg_ctl), fn name ->
+      File.exists?(postgres_bin(home, name))
+    end)
+  end
+
+  defp postgres_bin(home, name) do
+    Path.join(home, "bin/#{executable_name(name)}")
+  end
+
+  defp executable_name(name) do
+    if match?({:win32, _}, :os.type()), do: name <> ".exe", else: name
   end
 
   defp start_bundled!(home) do
@@ -118,7 +138,7 @@ defmodule Grims.Desktop.Postgres do
       log_path = Path.join(Path.dirname(data_dir()), "postgres.log")
 
       run_cmd!(
-        Path.join(home, "bin/pg_ctl"),
+        postgres_bin(home, "pg_ctl"),
         [
           "-D",
           data_dir(),
@@ -152,7 +172,7 @@ defmodule Grims.Desktop.Postgres do
       File.mkdir_p!(data_dir())
 
       run_cmd!(
-        Path.join(home, "bin/initdb"),
+        postgres_bin(home, "initdb"),
         [
           "-D",
           data_dir(),
@@ -168,7 +188,7 @@ defmodule Grims.Desktop.Postgres do
   end
 
   defp running?(home) do
-    pg_isready = Path.join(home, "bin/pg_isready")
+    pg_isready = postgres_bin(home, "pg_isready")
 
     if File.exists?(pg_isready) do
       run_cmd(pg_isready, ["-h", "127.0.0.1", "-p", Integer.to_string(port())], home) == 0
@@ -219,10 +239,22 @@ defmodule Grims.Desktop.Postgres do
   end
 
   defp cmd_env(home) do
-    [
-      {"LD_LIBRARY_PATH", ld_library_path(home)},
-      {"PATH", "#{Path.join(home, "bin")}:#{System.get_env("PATH", "/usr/bin")}"}
-    ]
+    bin = Path.join(home, "bin")
+
+    case :os.type() do
+      {:win32, _} ->
+        lib = Path.join(home, "lib")
+
+        [
+          {"PATH", Enum.join([bin, lib, System.get_env("PATH", "")], ";")}
+        ]
+
+      {:unix, _} ->
+        [
+          {"LD_LIBRARY_PATH", ld_library_path(home)},
+          {"PATH", "#{bin}:#{System.get_env("PATH", "/usr/bin")}"}
+        ]
+    end
   end
 
   defp ld_library_path(home) do
@@ -243,6 +275,7 @@ defmodule Grims.Desktop.Postgres do
       Build a desktop package first:
 
           cd backend && MIX_ENV=prod mix desktop.package.linux
+          cd backend && MIX_ENV=prod mix desktop.package.windows
 
       Or set GRIMS_POSTGRES_HOME to a PostgreSQL binary directory.
     """
